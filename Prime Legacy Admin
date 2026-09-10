@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prime Langcy Admin</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #0b0b0b;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    .box {
+      max-width: 450px;
+      margin: 60px auto;
+      padding: 25px;
+      background: #171717;
+      border-radius: 15px;
+    }
+
+    h1, h2 {
+      color: #f5c542;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0 15px;
+      box-sizing: border-box;
+      background: #0d0d0d;
+      color: white;
+      border: 1px solid #444;
+      border-radius: 8px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border: 0;
+      border-radius: 8px;
+      background: #f5c542;
+      color: black;
+      font-weight: bold;
+    }
+
+    .secondary {
+      background: #333;
+      color: white;
+    }
+
+    #dashboard {
+      display: none;
+    }
+
+    #message {
+      margin-top: 15px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box" id="login">
+
+  <h1>Prime Langcy</h1>
+  <h2>Admin Login</h2>
+
+  <input id="email" type="email" placeholder="Admin email">
+
+  <input id="password" type="password" placeholder="Password">
+
+  <button onclick="login()">LOGIN</button>
+
+  <button class="secondary" onclick="forgotPassword()">
+    FORGOT PASSWORD
+  </button>
+
+  <div id="message"></div>
+
+</div>
+
+
+<div class="box" id="dashboard">
+
+  <h1>Admin Dashboard</h1>
+
+  <button class="secondary" onclick="logout()">LOGOUT</button>
+
+  <h2>Announcement</h2>
+
+  <input id="title" placeholder="Announcement title">
+
+  <textarea id="announcement" placeholder="Write announcement"></textarea>
+
+  <button onclick="saveAnnouncement()">
+    SAVE ANNOUNCEMENT
+  </button>
+
+  <div id="dashMessage"></div>
+
+</div>
+
+
+<script>
+
+const SUPABASE_URL =
+"https://iiuizorqpevywsjcdeng.supabase.co";
+
+const SUPABASE_KEY =
+"YOUR
+
+const client =
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+
+// LOGIN
+async function login() {
+
+  const email =
+    document.getElementById("email").value;
+
+  const password =
+    document.getElementById("password").value;
+
+  const message =
+    document.getElementById("message");
+
+  message.innerText = "Logging in...";
+
+  const { data, error } =
+    await client.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+
+  if (error) {
+    message.innerText = error.message;
+    return;
+  }
+
+  showDashboard();
+}
+
+
+// FORGOT PASSWORD
+async function forgotPassword() {
+
+  const email =
+    document.getElementById("email").value;
+
+  const message =
+    document.getElementById("message");
+
+  if (!email) {
+    message.innerText =
+      "Enter your admin email first.";
+    return;
+  }
+
+  const { error } =
+    await client.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo:
+        "https://zaifkhan835-byte.github.io/Prime-Langcy-Official-/admin.html"
+      }
+    );
+
+  if (error) {
+    message.innerText = error.message;
+    return;
+  }
+
+  message.innerText =
+    "Password reset email sent!";
+}
+
+
+// DASHBOARD
+function showDashboard() {
+
+  document.getElementById("login").style.display = "none";
+
+  document.getElementById("dashboard").style.display = "block";
+}
+
+
+// LOGOUT
+async function logout() {
+
+  await client.auth.signOut();
+
+  document.getElementById("dashboard").style.display = "none";
+
+  document.getElementById("login").style.display = "block";
+}
+
+
+// SAVE ANNOUNCEMENT
+async function saveAnnouncement() {
+
+  const title =
+    document.getElementById("title").value;
+
+  const announcement =
+    document.getElementById("announcement").value;
+
+  const msg =
+    document.getElementById("dashMessage");
+
+  if (!title || !announcement) {
+    msg.innerText =
+      "Fill both fields.";
+    return;
+  }
+
+  const { error } =
+    await client
+      .from("announcements")
+      .insert({
+        title: title,
+        message: announcement
+      });
+
+  if (error) {
+    msg.innerText = error.message;
+    return;
+  }
+
+  msg.innerText =
+    "Announcement saved!";
+}
+
+
+// CHECK SESSION
+async function checkSession() {
+
+  const { data } =
+    await client.auth.getSession();
+
+  if (data.session) {
+    showDashboard();
+  }
+}
+
+checkSession();
+
+</script>
+
+</body>
+</html>
