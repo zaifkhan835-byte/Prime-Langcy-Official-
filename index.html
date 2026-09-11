@@ -267,6 +267,50 @@ footer {
 <footer>
   © 2026 Prime Langcy Official. All Rights Reserved.
 </footer>
+<div id="announcementBox" style="
+  max-width:700px;
+  margin:30px auto;
+  padding:20px;
+  background:#171717;
+  border:1px solid #f5c542;
+  border-radius:12px;
+  color:white;
+">
+  <h2 style="color:#f5c542;">📢 Latest Announcement</h2>
+  <h3 id="announcementTitle">Loading...</h3>
+  <p id="announcementMessage"></p>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = "https://iiuizorqpevywsjcdeng.supabase.co";
+const SUPABASE_KEY = "YOUR_PUBLISHABLE_KEY";
+
+const client = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+async function loadAnnouncement() {
+  const { data, error } = await client
+    .from("announcements")
+    .select("title, message")
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    console.log(error);
+    return;
+  }
+
+  if (data && data.length > 0) {
+    document.getElementById("announcementTitle").textContent = data[0].title;
+    document.getElementById("announcementMessage").textContent = data[0].message;
+  }
+}
+
+loadAnnouncement();
+</script>
 </body>
   </html>
